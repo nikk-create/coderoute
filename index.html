@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Code de la route Bénin</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Concept : un carnet d'entraînement façon panneau routier.
+   Carrés bleus pour les sujets, rond bleu ou rond cerclé de rouge pour la note. */
+:root{
+  --font-display:'Barlow Condensed','Arial Narrow',system-ui,sans-serif;
+  --font-body:'Barlow',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --bg:#eceff2; --surface:#ffffff; --surface-2:#f4f6f8; --paper:#ffffff;
+  --ink:#121b24; --muted:#566574; --line:#d3dae1;
+  --sign:#0b57c7; --sign-ink:#ffffff; --sign-soft:#e1ecfa;
+  --ok:#157a3b; --ok-soft:#e0f3e6; --bad:#c42626; --bad-soft:#fbe4e4;
+  --warn:#f4b400; --warn-ink:#2b2200;
+  --shadow:0 1px 0 rgba(18,27,36,.04),0 6px 18px -10px rgba(18,27,36,.25);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e151b; --surface:#16202a; --surface-2:#1c2833;
+    --ink:#e9eff5; --muted:#9aabbb; --line:#2b3947;
+    --sign:#6aa8ff; --sign-ink:#08121f; --sign-soft:#16304f;
+    --ok:#55c985; --ok-soft:#123222; --bad:#ff8383; --bad-soft:#3a1717;
+    --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e151b; --surface:#16202a; --surface-2:#1c2833;
+  --ink:#e9eff5; --muted:#9aabbb; --line:#2b3947;
+  --sign:#6aa8ff; --sign-ink:#08121f; --sign-soft:#16304f;
+  --ok:#55c985; --ok-soft:#123222; --bad:#ff8383; --bad-soft:#3a1717;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--font-body); font-size:17px; line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 40px;
+  -webkit-text-size-adjust:100%;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--sign);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.wrap{max-width:760px;margin:0 auto}
+.disp{font-family:var(--font-display);letter-spacing:.01em}
+.eyebrow{font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:.09em;font-size:14px;color:var(--muted)}
+.muted{color:var(--muted)}
+
+/* Boutons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 20px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-weight:600;font-size:17px;text-decoration:none}
+.btn:hover{border-color:var(--sign)}
+.btn.primary{background:var(--sign);border-color:var(--sign);color:var(--sign-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--sign);padding-inline:10px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn svg{width:20px;height:20px;flex:none}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--sign);font-weight:600;background:none;border:0;padding:8px 0;min-height:44px}
+.back svg{width:20px;height:20px}
+
+/* Accueil */
+.hero{padding:8px 0 20px}
+.hero h1{font-family:var(--font-display);font-weight:700;font-size:clamp(40px,9vw,58px);line-height:.98;letter-spacing:.005em;margin-top:6px;text-wrap:balance}
+.hero p{margin-top:12px;color:var(--muted);max-width:52ch}
+.progress-line{display:flex;align-items:center;gap:14px;margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.progress-line .num{font-family:var(--font-display);font-weight:700;font-size:30px;line-height:1;white-space:nowrap}
+.progress-line .num small{font-size:18px;color:var(--muted);font-weight:600}
+.bar{flex:1;height:10px;border-radius:99px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line);min-width:60px}
+.bar>i{display:block;height:100%;background:var(--ok);width:0}
+details.audio{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+details.audio summary{list-style:none;display:flex;align-items:center;gap:10px;padding:14px 16px;font-weight:600;cursor:pointer;min-height:52px}
+details.audio summary::-webkit-details-marker{display:none}
+details.audio summary svg{width:22px;height:22px;color:var(--sign)}
+details.audio summary .chev{margin-left:auto;transition:transform .15s}
+details.audio[open] summary .chev{transform:rotate(180deg)}
+.audio-body{display:grid;gap:14px;padding:4px 16px 16px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.row label{font-weight:500}
+select{font:inherit;color:var(--ink);background:var(--surface-2);border:2px solid var(--line);border-radius:8px;padding:9px 10px;min-height:44px;max-width:100%}
+.switch{position:relative;width:54px;height:32px;border-radius:99px;border:2px solid var(--line);background:var(--surface-2);padding:0;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.switch[aria-checked="true"]{background:var(--sign);border-color:var(--sign)}
+.switch[aria-checked="true"]::after{transform:translateX(22px);background:var(--sign-ink)}
+.note{font-size:14.5px;color:var(--muted)}
+.subjects{display:grid;gap:12px;margin-top:22px;padding:0;list-style:none}
+.subject{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.subject:hover{border-color:var(--sign)}
+.plate{grid-row:span 3;align-self:start;min-width:52px;height:52px;border-radius:8px;background:var(--sign);color:var(--sign-ink);display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:26px;border:3px solid var(--sign);box-shadow:inset 0 0 0 2px var(--sign-ink);padding:0 6px}
+.subject h2{font-family:var(--font-display);font-weight:700;font-size:25px;line-height:1.1}
+.subject .desc{color:var(--muted);font-size:15.5px}
+.dots{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.dot{width:14px;height:14px;border-radius:4px;border:2px solid var(--line);background:var(--surface-2)}
+.dot.pass{background:var(--ok);border-color:var(--ok)}
+.dot.fail{background:var(--bad);border-color:var(--bad)}
+.dots .cnt{margin-left:8px;font-size:14.5px;color:var(--muted);font-weight:500}
+.foot{margin-top:28px;font-size:14px;color:var(--muted);max-width:60ch}
+
+/* Série (liste des lots) */
+.head2{display:flex;gap:14px;align-items:center;margin:4px 0 6px}
+.head2 h1{font-family:var(--font-display);font-size:clamp(30px,7vw,40px);line-height:1.02;font-weight:700;text-wrap:balance}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14.5px;color:var(--muted);margin:10px 0 4px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:14px;padding:0;list-style:none}
+.lot{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:6px;box-shadow:var(--shadow);min-width:0}
+.lot.pass{border-color:var(--ok)} .lot.fail{border-color:var(--bad)}
+.lot .t{font-family:var(--font-display);font-weight:700;font-size:23px;line-height:1}
+.lot .st{font-size:14.5px;font-weight:600;display:flex;gap:6px;align-items:center;min-height:22px}
+.lot.pass .st{color:var(--ok)} .lot.fail .st{color:var(--bad)} .lot.new .st{color:var(--muted);font-weight:500}
+.lot .st svg{width:17px;height:17px;flex:none}
+.lot .acts{display:flex;gap:6px;flex-wrap:wrap}
+.lot .mini{min-height:40px;padding:6px 12px;font-size:15px;border-radius:8px;border:2px solid var(--line);background:var(--surface-2);font-weight:600;flex:1;white-space:nowrap}
+.lot .mini.go{background:var(--sign);border-color:var(--sign);color:var(--sign-ink)}
+
+/* Quiz */
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.qmeta{font-family:var(--font-display);font-weight:600;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+.segs{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:8px 0 16px}
+.segs button{height:12px;border-radius:4px;border:0;background:var(--line);padding:0}
+.segs button.done{background:var(--sign)}
+.segs button.cur{outline:3px solid var(--ink);outline-offset:1px}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.qtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:14px;padding:4px 10px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.tag.multi{background:var(--warn);border-color:var(--warn);color:var(--warn-ink)}
+.stem{font-size:clamp(19px,4.6vw,22px);line-height:1.32;font-weight:600;text-wrap:pretty}
+.figs{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:14px 0 4px}
+.figs img{display:block;background:var(--paper);border:1px solid var(--line);border-radius:8px;max-width:100%;height:auto;max-height:340px;width:auto;min-width:130px;object-fit:contain}
+.figs.crop img{max-height:none;width:100%;min-width:0}
+.listen{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.listen .btn{min-height:44px;padding:8px 16px;font-size:16px}
+.listen .auto{display:flex;align-items:center;gap:10px;margin-left:auto;font-size:15px;color:var(--muted)}
+.opts{display:grid;gap:10px;margin-top:16px}
+.opts.letters{grid-template-columns:repeat(auto-fit,minmax(78px,1fr))}
+.opt{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:12px;text-align:left;width:100%;min-height:58px;padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface-2);transition:border-color .1s,background .1s}
+.opt:hover{border-color:var(--sign)}
+.opt .box{width:26px;height:26px;border:2.5px solid var(--muted);background:var(--surface);display:grid;place-items:center;flex:none}
+.opt.single .box{border-radius:50%}
+.opt.multi .box{border-radius:6px}
+.opt .box svg{width:18px;height:18px;opacity:0;color:var(--sign-ink)}
+.opt .let{font-family:var(--font-display);font-weight:700;font-size:24px;min-width:20px}
+.opt .txt{min-width:0;overflow-wrap:anywhere}
+.opt[aria-checked="true"]{border-color:var(--sign);background:var(--sign-soft)}
+.opt[aria-checked="true"] .box{background:var(--sign);border-color:var(--sign)}
+.opt[aria-checked="true"] .box svg{opacity:1}
+.opt.reading{box-shadow:0 0 0 3px var(--warn)}
+.opts.letters .opt{grid-template-columns:auto auto;justify-content:center;min-height:62px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);padding:12px max(16px,env(safe-area-inset-left,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px))}
+.nav .in{max-width:760px;margin:0 auto;display:flex;gap:10px}
+.nav .btn{flex:1}
+.pad-nav{height:96px}
+
+.modal{position:fixed;inset:0;z-index:20;background:rgba(8,14,20,.6);display:grid;place-items:center;padding:20px}
+.modal .box{background:var(--surface);border-radius:14px;padding:20px;max-width:420px;width:100%;display:grid;gap:14px;border:1px solid var(--line)}
+.modal h2{font-family:var(--font-display);font-size:27px;font-weight:700}
+.modal .btns{display:flex;gap:10px;flex-wrap:wrap}
+.modal .btns .btn{flex:1;min-width:140px}
+
+/* Résultat */
+.result{text-align:center;display:grid;justify-items:center;gap:14px;padding:10px 0 4px}
+.roundel{width:190px;height:190px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;line-height:1}
+.roundel .s{font-size:84px}
+.roundel .o{font-size:30px;font-weight:600;opacity:.8}
+.roundel.pass{background:var(--sign);color:var(--sign-ink);border:6px solid var(--sign);box-shadow:inset 0 0 0 5px var(--sign-ink)}
+.roundel.fail{background:var(--paper);color:#14202b;border:16px solid var(--bad)}
+.verdict{font-family:var(--font-display);font-weight:700;font-size:34px;line-height:1.05;text-transform:uppercase;letter-spacing:.02em}
+.verdict.pass{color:var(--ok)} .verdict.fail{color:var(--bad)}
+.result .sub{color:var(--muted);max-width:44ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:6px 0}
+.chip{min-width:44px;min-height:44px;border-radius:8px;border:2px solid var(--line);background:var(--surface);font-family:var(--font-display);font-weight:700;font-size:20px;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 8px}
+.chip svg{width:16px;height:16px}
+.chip.ok{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.ko{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.actions{display:grid;gap:10px;width:100%;max-width:420px;margin-top:8px}
+
+/* Correction */
+.tabs{display:flex;gap:8px;margin:12px 0 16px;flex-wrap:wrap}
+.tabs button{min-height:44px;padding:8px 16px;border-radius:99px;border:2px solid var(--line);background:var(--surface);font-weight:600}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.rv{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;scroll-margin-top:12px}
+.rv.ok{border-left:6px solid var(--ok)} .rv.ko{border-left:6px solid var(--bad)}
+.rvhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-display);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:15px;padding:3px 10px;border-radius:6px}
+.badge svg{width:15px;height:15px}
+.badge.ok{background:var(--ok-soft);color:var(--ok)} .badge.ko{background:var(--bad-soft);color:var(--bad)}
+.rvopts{display:grid;gap:8px;margin-top:12px}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--surface-2)}
+.ro .let{font-family:var(--font-display);font-weight:700;font-size:22px;min-width:20px;line-height:1.2}
+.ro .lbl{grid-column:2;font-size:14px;font-weight:700;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.05em}
+.ro.good{border-color:var(--ok);background:var(--ok-soft)} .ro.good .lbl{color:var(--ok)}
+.ro.wrong{border-color:var(--bad);background:var(--bad-soft)} .ro.wrong .lbl{color:var(--bad)}
+.ro.missed{border-style:dashed}
+.empty{padding:26px 10px;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media (max-width:420px){.opt{gap:10px;padding:10px 12px}.roundel{width:170px;height:170px}.roundel .s{font-size:74px}}
+</style>
+</head>
+<body>
+
+<div id="app" class="wrap"></div>
+<div id="modal"></div>
+<script src="data.js"></script>
+<script>
+(function(){
+'use strict';
+var D = window.QUIZ_DATA, Q = D.questions, CH = D.chapters;
+var PASS = 13, ROMAN = {2:'II',3:'III',4:'IV',5:'V',6:'VI',7:'VII',8:'VIII',9:'IX',10:'X',11:'XI'};
+var KP = 'codebj-progress-v1', KS = 'codebj-settings-v1';
+function load(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)); return v || d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+var P = load(KP, {lots:{}});
+var SET = Object.assign({auto:true, rate:1, voice:''}, load(KS, {}));
+var S = {view:'home', ci:null, li:null, ids:[], idx:0, ans:{}, filter:'all', rev:null, reading:-1, speaking:false};
+var $app = document.getElementById('app'), $modal = document.getElementById('modal');
+
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+var IC = {
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>',
+  cross:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>',
+  spk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 010 6M18 6.5a8 8 0 010 11"/></svg>',
+  stop:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+  chev:'<svg class="chev" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>'
+};
+
+/* ---------- Audio (synthèse vocale du navigateur) ---------- */
+var synth = ('speechSynthesis' in window) ? window.speechSynthesis : null, voices = [], token = 0;
+function loadVoices(){ if(!synth) return; voices = synth.getVoices().filter(function(v){ return /^fr/i.test(v.lang); }); }
+if(synth){ loadVoices(); synth.onvoiceschanged = function(){ loadVoices(); if(S.view==='home') render(); }; }
+function pickVoice(){
+  if(SET.voice){ for(var i=0;i<voices.length;i++) if(voices[i].voiceURI===SET.voice) return voices[i]; }
+  var pref = ['fr-FR','fr_FR','fr-BE','fr-CA','fr-CH'];
+  for(var p=0;p<pref.length;p++) for(var j=0;j<voices.length;j++) if(voices[j].lang.replace('_','-')===pref[p].replace('_','-')) return voices[j];
+  return voices[0] || null;
+}
+function sayable(t){
+  return String(t)
+    .replace(/(\d)\s*km\/h/gi,'$1 kilomètres par heure').replace(/km\/h/gi,'kilomètres par heure')
+    .replace(/(\d)\s*km\b/gi,'$1 kilomètres')
+    .replace(/(\d)\s*(?:mn|min)\b/gi,'$1 minutes')
+    .replace(/(\d+)\s*h\s*(\d+)/gi,'$1 heures $2')
+    .replace(/(\d+)\s*h\b/gi,'$1 heures')
+    .replace(/(\d)\s*kg\b/gi,'$1 kilogrammes')
+    .replace(/(\d)\s*T\b/g,'$1 tonnes')
+    .replace(/(\d)\s*m\b/g,'$1 mètres')
+    .replace(/(\d)ans\b/gi,'$1 ans')
+    .replace(/%/g,' pour cent')
+    .replace(/\bn°\s*/gi,'numéro ')
+    .replace(/\b(PTAC|PTRA|TIR|SAMU|SMUR|TCR|ABS)\b/g,function(m){ return m.split('').join(' '); })
+    .replace(/\b([A-Z]{1,2}|Im|In)\s?(\d+)\s?([a-z]\b)?/g,function(m,a,b,c){ return a+' '+b+(c?' '+c:''); })
+    .replace(/\s+[-–—]\s+/g,', ').replace(/\s*;\s*/g,', ').replace(/\//g,' ou ');
+}
+var lastCancel = 0;
+function stopSpeak(){ token++; S.reading=-1; S.speaking=false; if(synth){ try{ if(synth.speaking||synth.pending){ lastCancel = Date.now(); } synth.cancel(); }catch(e){} } paintReading(); paintListen(); }
+function speakSegs(segs){
+  if(!synth || !segs.length) return;
+  if(!voices.length) loadVoices();
+  token++; var my = token;
+  if(synth.speaking||synth.pending){ lastCancel = Date.now(); try{ synth.cancel(); }catch(e){} }
+  var v = pickVoice(); S.speaking = true; paintListen();
+  var go = function(){
+    if(my !== token) return;
+    segs.forEach(function(seg, i){
+      var u = new SpeechSynthesisUtterance(sayable(seg.text));
+      u.lang = v ? v.lang : 'fr-FR'; if(v) u.voice = v; u.rate = SET.rate; u.pitch = 1;
+      u.onstart = function(){ if(my!==token) return; S.reading = (seg.opt==null ? -1 : seg.opt); paintReading(); };
+      var end = function(){ if(my!==token) return; if(i===segs.length-1){ S.reading=-1; S.speaking=false; paintReading(); paintListen(); } };
+      u.onend = end; u.onerror = end;
+      synth.speak(u);
+    });
+  };
+  var wait = 130 - (Date.now() - lastCancel);
+  if(wait > 0) setTimeout(go, wait); else go();
+}
+function L(i){ return String.fromCharCode(65+i); }
+function questionSegs(q, pos, total){
+  var segs = [{text:'Question '+pos+' sur '+total+'.'}, {text:q.s}];
+  if(q.L) segs.push({text:'Observez bien l’illustration.'});
+  segs.push({text: q.a.length>1 ? 'Plusieurs réponses possibles.' : 'Une seule réponse.'});
+  if(q.L) segs.push({text:'Les propositions sont : '+q.o.map(function(_,i){ return L(i); }).join(', ')+'.', opt:null});
+  else q.o.forEach(function(o,i){ segs.push({text:'Réponse '+L(i)+'. '+o, opt:i}); });
+  return segs;
+}
+function correctionSegs(q){
+  var segs = [{text:q.s}];
+  var good = q.a.slice().sort().map(function(i){ return q.L ? L(i) : 'Réponse '+L(i)+'. '+q.o[i]; });
+  segs.push({text:(q.a.length>1?'Les bonnes réponses sont : ':'La bonne réponse est : ')+good.join('. ')+'.'});
+  return segs;
+}
+function paintReading(){
+  var els = document.querySelectorAll('.opt');
+  for(var i=0;i<els.length;i++) els[i].classList.toggle('reading', S.reading===i);
+}
+function paintListen(){
+  var b = document.getElementById('listen'); if(!b) return;
+  b.innerHTML = (S.speaking ? IC.stop+'Arrêter' : IC.spk+'Écouter');
+  b.setAttribute('aria-label', S.speaking ? 'Arrêter la lecture' : 'Écouter la question');
+}
+
+/* ---------- Données de progression ---------- */
+function key(ci, li){ return ci+'-'+li; }
+function lotState(ci, li){ var r = P.lots[key(ci,li)]; if(!r) return 'new'; return r.best>=PASS ? 'pass' : 'fail'; }
+function score(ids, ans){ var n=0; ids.forEach(function(id){ if(isRight(Q[id], ans[id])) n++; }); return n; }
+function isRight(q, sel){ var a=q.a.slice().sort().join(','), b=(sel||[]).slice().sort().join(','); return a===b; }
+function chapterById(id){ for(var i=0;i<CH.length;i++) if(CH[i].id===id) return CH[i]; }
+
+/* ---------- Vues ---------- */
+function vHome(){
+  var totalLots=0, passed=0;
+  CH.forEach(function(c){ c.lots.forEach(function(_,li){ totalLots++; if(lotState(c.id,li)==='pass') passed++; }); });
+  var html = '<header class="hero"><div class="eyebrow">Manuel du candidat · Édition 2011</div>'+
+    '<h1>Code de la route Bénin</h1>'+
+    '<p>'+Object.keys(Q).length+' questions corrigées, par séries de 10. Chaque question est lue à voix haute, puis la note sur 20 tombe à la fin de la série.</p>'+
+    '<div class="progress-line"><div class="num">'+passed+'<small> / '+totalLots+'</small></div><div class="bar" role="img" aria-label="'+passed+' séries réussies sur '+totalLots+'"><i style="width:'+Math.round(passed/totalLots*100)+'%"></i></div><div class="muted" style="font-size:15px">séries réussies</div></div>'+
+    audioPanel()+'</header>';
+  html += '<ul class="subjects">'+CH.map(function(c){
+    var dots = c.lots.map(function(_,li){ var st=lotState(c.id,li); return '<span class="dot '+st+'"></span>'; }).join('');
+    var done = c.lots.filter(function(_,li){ return lotState(c.id,li)==='pass'; }).length;
+    return '<li><button class="subject" data-act="chap" data-ci="'+c.id+'"><span class="plate" aria-hidden="true">'+ROMAN[c.id]+'</span>'+
+      '<h2>'+esc(c.t)+'</h2><span class="desc">'+esc(c.d)+'</span>'+
+      '<span class="dots" aria-label="'+done+' séries réussies sur '+c.lots.length+'">'+dots+'<span class="cnt">'+done+'/'+c.lots.length+'</span></span></button></li>';
+  }).join('')+'</ul>';
+  html += '<p class="foot">Questions et corrigés tirés du Manuel du candidat à l’examen du permis de conduire (Bénin, édition 2011). Une série est réussie à partir de '+PASS+'/20. Chaque bonne question rapporte 2 points et il faut cocher toutes les bonnes réponses, et elles seulement. Les résultats restent enregistrés sur cet appareil.</p>';
+  return html;
+}
+function audioPanel(){
+  var vopts = voices.length ? voices.map(function(v){ var sel = (SET.voice? SET.voice===v.voiceURI : pickVoice()===v); return '<option value="'+esc(v.voiceURI)+'"'+(sel?' selected':'')+'>'+esc(v.name)+' ('+esc(v.lang)+')</option>'; }).join('') : '';
+  var msg = !synth ? 'La lecture à voix haute n’est pas disponible dans ce navigateur.' : (!voices.length ? 'Aucune voix française détectée pour l’instant. Sur Android, installez la voix française dans les réglages de synthèse vocale de l’appareil.' : '');
+  return '<details class="audio"'+(msg?' open':'')+'><summary>'+IC.spk+'Réglages audio'+IC.chev+'</summary><div class="audio-body">'+
+    '<div class="row"><label id="l-auto">Lire chaque question automatiquement</label><button class="switch" role="switch" id="sw-auto" aria-labelledby="l-auto" aria-checked="'+SET.auto+'" data-act="auto"></button></div>'+
+    '<div class="row"><label for="rate">Vitesse de lecture</label><select id="rate" data-act="rate"><option value="0.8"'+(SET.rate==0.8?' selected':'')+'>Lente</option><option value="1"'+(SET.rate==1?' selected':'')+'>Normale</option><option value="1.2"'+(SET.rate==1.2?' selected':'')+'>Rapide</option></select></div>'+
+    (voices.length?'<div class="row"><label for="voice">Voix</label><select id="voice" data-act="voice">'+vopts+'</select></div>':'')+
+    (msg?'<p class="note">'+esc(msg)+'</p>':'<div><button class="btn" data-act="test">'+IC.spk+'Tester la voix</button></div>')+
+    '</div></details>';
+}
+function vChap(){
+  var c = chapterById(S.ci);
+  var html = '<button class="back" data-act="home">'+IC.back+'Tous les sujets</button>'+
+    '<div class="head2"><span class="plate" aria-hidden="true">'+ROMAN[c.id]+'</span><h1>'+esc(c.t)+'</h1></div>'+
+    '<p class="muted">'+esc(c.d)+' · '+c.total+' questions en '+c.lots.length+' séries de 10</p>'+
+    '<div class="legend"><span><i class="dot pass"></i>Réussie (13/20 ou plus)</span><span><i class="dot fail"></i>À refaire</span><span><i class="dot"></i>Pas encore faite</span></div>'+
+    '<ul class="lots">'+c.lots.map(function(ids,li){
+      var r = P.lots[key(c.id,li)], st = lotState(c.id,li);
+      var label = st==='new' ? 'Pas encore faite' : (st==='pass' ? IC.check+'Réussie · '+r.best+'/20' : IC.cross+'À refaire · '+r.best+'/20');
+      return '<li class="lot '+st+'"><div class="t">Série '+(li+1)+'</div><div class="st">'+label+'</div><div class="acts">'+
+        '<button class="mini go" data-act="start" data-li="'+li+'">'+(st==='new'?'Commencer':'Refaire')+'</button>'+
+        (r && r.last ? '<button class="mini" data-act="review-saved" data-li="'+li+'">Correction</button>' : '')+'</div></li>';
+    }).join('')+'</ul>';
+  return html;
+}
+function curQ(){ return Q[S.ids[S.idx]]; }
+function optsHtml(q){
+  var cur = S.ans[q.n] || [], multi = q.a.length>1;
+  return q.o.map(function(t,i){
+    var on = cur.indexOf(i)>=0;
+    return '<button class="opt '+(multi?'multi':'single')+'" role="'+(multi?'checkbox':'radio')+'" aria-checked="'+on+'" data-act="pick" data-i="'+i+'">'+
+      '<span class="box" aria-hidden="true">'+IC.check+'</span><span class="let">'+L(i)+'</span>'+(q.L?'':'<span class="txt">'+esc(t)+'</span>')+'</button>';
+  }).join('');
+}
+function figsHtml(q){
+  if(!q.i.length) return '';
+  return '<div class="figs'+(q.L?' crop':'')+'">'+q.i.map(function(s){ return '<img src="'+esc(s)+'" alt="Illustration de la question n° '+q.n+'">'; }).join('')+'</div>';
+}
+function vQuiz(){
+  var c = chapterById(S.ci), q = curQ(), total = S.ids.length, multi = q.a.length>1;
+  var segs = S.ids.map(function(id,i){ var a=(S.ans[id]||[]).length>0; return '<button class="'+(a?'done ':'')+(i===S.idx?'cur':'')+'" data-act="goto" data-i="'+i+'" aria-label="Question '+(i+1)+(a?' (répondue)':'')+'"></button>'; }).join('');
+  var last = S.idx===total-1;
+  return '<div class="topline"><button class="back" data-act="quit">'+IC.back+'Quitter</button><div class="qmeta">'+esc(c.t)+' · Série '+(S.li+1)+'</div></div>'+
+    '<div class="segs">'+segs+'</div>'+
+    '<section class="qcard" aria-live="polite"><div class="qtop"><span class="tag">Question '+(S.idx+1)+' / '+total+'</span>'+
+      '<span class="tag '+(multi?'multi':'')+'">'+(multi?'Plusieurs réponses possibles':'Une seule réponse')+'</span>'+
+      '<span class="tag" title="Numéro dans le manuel">n° '+q.n+'</span></div>'+
+    '<h2 class="stem">'+esc(q.s)+'</h2>'+figsHtml(q)+
+    '<div class="listen"><button class="btn" id="listen" data-act="listen">'+IC.spk+'Écouter</button>'+
+      '<span class="auto"><span id="l-auto2">Lecture auto</span><button class="switch" role="switch" aria-labelledby="l-auto2" aria-checked="'+SET.auto+'" data-act="auto2"></button></span></div>'+
+    '<div class="opts'+(q.L?' letters':'')+'" id="opts" role="'+(multi?'group':'radiogroup')+'" aria-label="Réponses">'+optsHtml(q)+'</div></section>'+
+    '<div class="pad-nav"></div>'+
+    '<nav class="nav"><div class="in"><button class="btn" data-act="prev"'+(S.idx===0?' disabled':'')+'>'+IC.back+'Précédent</button>'+
+    (last ? '<button class="btn primary" data-act="finish">Terminer la série</button>' : '<button class="btn primary" data-act="next">Suivant'+IC.next+'</button>')+'</div></nav>';
+}
+function vResult(){
+  var c = chapterById(S.ci), r = S.rev, pass = r.score>=PASS;
+  var next = S.li+1 < c.lots.length;
+  var chips = r.ids.map(function(id,i){ var ok=isRight(Q[id], r.ans[id]); return '<button class="chip '+(ok?'ok':'ko')+'" data-act="rv-go" data-id="'+id+'" aria-label="Question '+(i+1)+' : '+(ok?'juste':'fausse')+'">'+(i+1)+(ok?IC.check:IC.cross)+'</button>'; }).join('');
+  var good = r.score/2;
+  var sub = pass ? 'Série réussie : '+good+' bonne'+(good>1?'s':'')+' réponse'+(good>1?'s':'')+' sur 10.' :
+    good+' bonne'+(good>1?'s':'')+' réponse'+(good>1?'s':'')+' sur 10. Il faut au moins '+PASS+'/20 pour réussir, il manque '+(PASS-r.score)+' point'+((PASS-r.score)>1?'s':'')+'. Consultez la correction, puis refaites la série.';
+  return '<button class="back" data-act="chap-back">'+IC.back+'Séries de ce sujet</button>'+
+    '<div class="result"><div class="eyebrow">'+esc(c.t)+' · Série '+(S.li+1)+'</div>'+
+    '<div class="roundel '+(pass?'pass':'fail')+'" role="img" aria-label="Note '+r.score+' sur 20"><div><span class="s">'+r.score+'</span><span class="o">/20</span></div></div>'+
+    '<div class="verdict '+(pass?'pass':'fail')+'">'+(pass?'Réussi':'Échoué')+'</div><p class="sub">'+esc(sub)+'</p>'+
+    '<div class="chips">'+chips+'</div>'+
+    '<div class="actions"><button class="btn primary" data-act="review">Voir la correction</button>'+
+    '<button class="btn'+(pass?'':' primary')+'" data-act="retry">Refaire cette série</button>'+
+    (pass && next ? '<button class="btn" data-act="next-lot">Série suivante'+IC.next+'</button>' : '')+
+    '<button class="btn ghost" data-act="chap-back">Retour aux séries</button></div></div>';
+}
+function vReview(){
+  var c = chapterById(S.ci), r = S.rev;
+  var errs = r.ids.filter(function(id){ return !isRight(Q[id], r.ans[id]); });
+  var list = S.filter==='err' ? errs : r.ids;
+  var html = '<button class="back" data-act="back-from-review">'+IC.back+'Retour</button>'+
+    '<div class="head2"><h1>Correction · Série '+(S.li+1)+'</h1></div>'+
+    '<p class="muted">'+esc(c.t)+' · note '+r.score+'/20 · '+errs.length+' erreur'+(errs.length>1?'s':'')+'</p>'+
+    '<div class="tabs" role="group" aria-label="Filtre"><button data-act="filter" data-f="all" aria-pressed="'+(S.filter==='all')+'">Toutes (10)</button><button data-act="filter" data-f="err" aria-pressed="'+(S.filter==='err')+'">Erreurs ('+errs.length+')</button></div>';
+  if(!list.length) html += '<div class="empty">Aucune erreur dans cette série. Bravo.</div>';
+  list.forEach(function(id){
+    var q = Q[id], sel = r.ans[id] || [], ok = isRight(q, sel), pos = r.ids.indexOf(id)+1;
+    var rows = q.o.map(function(t,i){
+      var isGood = q.a.indexOf(i)>=0, picked = sel.indexOf(i)>=0, cls='', lbl='';
+      if(isGood && picked){ cls='good'; lbl='Bonne réponse, cochée'; }
+      else if(isGood && !picked){ cls='good missed'; lbl='Bonne réponse, non cochée'; }
+      else if(!isGood && picked){ cls='wrong'; lbl='Cochée à tort'; }
+      return '<div class="ro '+cls+'"><span class="let">'+L(i)+'</span><span>'+(q.L?'':esc(t))+'</span>'+(lbl?'<span class="lbl">'+lbl+'</span>':'')+'</div>';
+    }).join('');
+    var none = sel.length===0 ? '<p class="note" style="margin-top:8px">Aucune réponse cochée.</p>' : '';
+    html += '<article class="rv '+(ok?'ok':'ko')+'" id="rv-'+id+'"><div class="rvhead"><span class="badge '+(ok?'ok':'ko')+'">'+(ok?IC.check+'Juste · 2 pts':IC.cross+'Faux · 0 pt')+'</span><span class="tag">Question '+pos+'</span><span class="tag">n° '+q.n+'</span></div>'+
+      '<h2 class="stem">'+esc(q.s)+'</h2>'+figsHtml(q)+none+'<div class="rvopts">'+rows+'</div>'+
+      '<div class="listen"><button class="btn" data-act="say-corr" data-id="'+id+'">'+IC.spk+'Écouter la correction</button></div></article>';
+  });
+  html += '<div class="actions" style="margin:20px auto 0"><button class="btn primary" data-act="retry">Refaire cette série</button><button class="btn ghost" data-act="chap-back">Retour aux séries</button></div>';
+  return html;
+}
+
+/* ---------- Rendu ---------- */
+function render(keepScroll){
+  var y = window.scrollY;
+  $app.innerHTML = S.view==='home' ? vHome() : S.view==='chap' ? vChap() : S.view==='quiz' ? vQuiz() : S.view==='result' ? vResult() : vReview();
+  if(!keepScroll) window.scrollTo(0,0); else window.scrollTo(0,y);
+  paintReading(); paintListen();
+}
+function autoRead(){
+  if(S.view==='quiz' && SET.auto && synth){ speakSegs(questionSegs(curQ(), S.idx+1, S.ids.length)); }
+}
+function startLot(li){
+  var c = chapterById(S.ci); S.li = li; S.ids = c.lots[li].slice(); S.idx = 0; S.ans = {}; S.view = 'quiz'; stopSpeak(); render(); autoRead();
+}
+function goQ(i){ stopSpeak(); S.idx = i; render(); autoRead(); }
+function finish(force){
+  var unanswered = S.ids.filter(function(id){ return !(S.ans[id]||[]).length; }).length;
+  if(unanswered && !force){
+    $modal.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt"><div class="box"><h2 id="mt">Série incomplète</h2><p>'+unanswered+' question'+(unanswered>1?'s':'')+' sans réponse. '+(unanswered>1?'Elles compteront':'Elle comptera')+' comme '+(unanswered>1?'fausses':'fausse')+'.</p><div class="btns"><button class="btn" data-act="m-close">Revenir aux questions</button><button class="btn primary" data-act="m-finish">Terminer quand même</button></div></div></div>';
+    return;
+  }
+  stopSpeak(); $modal.innerHTML = '';
+  var n = score(S.ids, S.ans), pts = n*2, k = key(S.ci, S.li), prev = P.lots[k] || {attempts:0, best:0};
+  P.lots[k] = {attempts:(prev.attempts||0)+1, best:Math.max(prev.best||0, pts), last:{score:pts, ids:S.ids.slice(), ans:S.ans, t:Date.now()}};
+  save(KP, P);
+  S.rev = {score:pts, ids:S.ids.slice(), ans:JSON.parse(JSON.stringify(S.ans))}; S.view = 'result'; render();
+}
+
+/* ---------- Événements ---------- */
+document.addEventListener('click', function(e){
+  var t = e.target.closest('[data-act]'); if(!t) return;
+  var a = t.getAttribute('data-act');
+  if(a==='chap'){ S.ci = +t.getAttribute('data-ci'); S.view='chap'; render(); }
+  else if(a==='home'){ stopSpeak(); S.view='home'; render(); }
+  else if(a==='chap-back'){ stopSpeak(); S.view='chap'; render(); }
+  else if(a==='start'){ startLot(+t.getAttribute('data-li')); }
+  else if(a==='retry'){ startLot(S.li); }
+  else if(a==='next-lot'){ startLot(S.li+1); }
+  else if(a==='pick'){
+    var q = curQ(), i = +t.getAttribute('data-i'), cur = (S.ans[q.n]||[]).slice();
+    if(q.a.length>1){ var p = cur.indexOf(i); if(p>=0) cur.splice(p,1); else cur.push(i); }
+    else cur = (cur[0]===i) ? [] : [i];
+    S.ans[q.n] = cur; document.getElementById('opts').innerHTML = optsHtml(q); paintReading();
+    var seg = document.querySelectorAll('.segs button'); if(seg[S.idx]) seg[S.idx].classList.toggle('done', cur.length>0);
+  }
+  else if(a==='next'){ goQ(S.idx+1); }
+  else if(a==='prev'){ goQ(S.idx-1); }
+  else if(a==='goto'){ goQ(+t.getAttribute('data-i')); }
+  else if(a==='listen'){ if(S.speaking) stopSpeak(); else speakSegs(questionSegs(curQ(), S.idx+1, S.ids.length)); }
+  else if(a==='auto' || a==='auto2'){ SET.auto = !SET.auto; save(KS, SET); t.setAttribute('aria-checked', SET.auto); var all = document.querySelectorAll('.switch'); for(var s=0;s<all.length;s++) all[s].setAttribute('aria-checked', SET.auto); if(!SET.auto) stopSpeak(); }
+  else if(a==='test'){ speakSegs([{text:'Bonjour. Voici la voix qui lira les questions du code de la route.'}]); }
+  else if(a==='quit'){
+    $modal.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt"><div class="box"><h2 id="mt">Quitter la série ?</h2><p>Les réponses de cette série seront perdues.</p><div class="btns"><button class="btn" data-act="m-close">Continuer la série</button><button class="btn primary" data-act="m-quit">Quitter</button></div></div></div>';
+  }
+  else if(a==='m-close'){ $modal.innerHTML = ''; }
+  else if(a==='m-quit'){ $modal.innerHTML=''; stopSpeak(); S.view='chap'; render(); }
+  else if(a==='finish'){ finish(false); }
+  else if(a==='m-finish'){ finish(true); }
+  else if(a==='review'){ S.filter='all'; S.view='review'; S.from='result'; stopSpeak(); render(); }
+  else if(a==='review-saved'){ var li=+t.getAttribute('data-li'), r=P.lots[key(S.ci,li)]; if(r&&r.last){ S.li=li; S.rev={score:r.last.score, ids:r.last.ids, ans:r.last.ans}; S.filter='all'; S.view='review'; S.from='chap'; render(); } }
+  else if(a==='back-from-review'){ stopSpeak(); S.view = S.from==='result' ? 'result' : 'chap'; render(); }
+  else if(a==='filter'){ S.filter = t.getAttribute('data-f'); render(true); }
+  else if(a==='rv-go'){ var id=t.getAttribute('data-id'); S.filter='all'; S.view='review'; S.from='result'; render(); var el=document.getElementById('rv-'+id); if(el) el.scrollIntoView({block:'start'}); }
+  else if(a==='say-corr'){ var qq=Q[t.getAttribute('data-id')]; speakSegs(correctionSegs(qq)); }
+});
+document.addEventListener('change', function(e){
+  var t = e.target; var a = t.getAttribute && t.getAttribute('data-act');
+  if(a==='rate'){ SET.rate = parseFloat(t.value); save(KS, SET); }
+  else if(a==='voice'){ SET.voice = t.value; save(KS, SET); }
+});
+window.addEventListener('pagehide', function(){ if(synth) try{ synth.cancel(); }catch(e){} });
+render();
+})();
+</script>
+
+</body>
+</html>
