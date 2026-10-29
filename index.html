@@ -122,7 +122,7 @@ select{font:inherit;color:var(--ink);background:var(--surface-2);border:2px soli
 /* Quiz */
 .topline{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .qmeta{font-family:var(--font-display);font-weight:600;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
-.segs{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:8px 0 16px}
+.segs{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;margin:8px 0 16px}
 .segs button{height:12px;border-radius:4px;border:0;background:var(--line);padding:0}
 .segs button.done{background:var(--sign)}
 .segs button.cur{outline:3px solid var(--ink);outline-offset:1px}
@@ -211,8 +211,8 @@ select{font:inherit;color:var(--ink);background:var(--surface-2);border:2px soli
 (function(){
 'use strict';
 var D = window.QUIZ_DATA, Q = D.questions, CH = D.chapters;
-var PASS = 13, ROMAN = {2:'II',3:'III',4:'IV',5:'V',6:'VI',7:'VII',8:'VIII',9:'IX',10:'X',11:'XI'};
-var KP = 'codebj-progress-v1', KS = 'codebj-settings-v1';
+var PASS = 14, ROMAN = {2:'II',3:'III',4:'IV',5:'V',6:'VI',7:'VII-VIII',9:'IX',10:'X',11:'XI'};
+var KP = 'codebj-progress-v2', KS = 'codebj-settings-v1';
 function load(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)); return v || d; }catch(e){ return d; } }
 function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 var P = load(KP, {lots:{}});
@@ -318,7 +318,7 @@ function vHome(){
   CH.forEach(function(c){ c.lots.forEach(function(_,li){ totalLots++; if(lotState(c.id,li)==='pass') passed++; }); });
   var html = '<header class="hero"><div class="eyebrow">Manuel du candidat · Édition 2011</div>'+
     '<h1>Code de la route Bénin</h1>'+
-    '<p>'+Object.keys(Q).length+' questions corrigées, par séries de 10. Chaque question est lue à voix haute, puis la note sur 20 tombe à la fin de la série.</p>'+
+    '<p>'+Object.keys(Q).length+' questions corrigées, par séries de 20. Chaque question est lue à voix haute, puis la note sur 20 tombe à la fin de la série.</p>'+
     '<div class="progress-line"><div class="num">'+passed+'<small> / '+totalLots+'</small></div><div class="bar" role="img" aria-label="'+passed+' séries réussies sur '+totalLots+'"><i style="width:'+Math.round(passed/totalLots*100)+'%"></i></div><div class="muted" style="font-size:15px">séries réussies</div></div>'+
     audioPanel()+'</header>';
   html += '<ul class="subjects">'+CH.map(function(c){
@@ -328,7 +328,7 @@ function vHome(){
       '<h2>'+esc(c.t)+'</h2><span class="desc">'+esc(c.d)+'</span>'+
       '<span class="dots" aria-label="'+done+' séries réussies sur '+c.lots.length+'">'+dots+'<span class="cnt">'+done+'/'+c.lots.length+'</span></span></button></li>';
   }).join('')+'</ul>';
-  html += '<p class="foot">Questions et corrigés tirés du Manuel du candidat à l’examen du permis de conduire (Bénin, édition 2011). Une série est réussie à partir de '+PASS+'/20. Chaque bonne question rapporte 2 points et il faut cocher toutes les bonnes réponses, et elles seulement. Les résultats restent enregistrés sur cet appareil.</p>';
+  html += '<p class="foot">Questions et corrigés tirés du Manuel du candidat à l’examen du permis de conduire (Bénin, édition 2011). Une série est réussie à partir de '+PASS+'/20 : 13/20 est éliminatoire. Chaque bonne question rapporte 1 point et il faut cocher toutes les bonnes réponses, et elles seulement. Les résultats restent enregistrés sur cet appareil.</p>';
   return html;
 }
 function audioPanel(){
@@ -345,8 +345,8 @@ function vChap(){
   var c = chapterById(S.ci);
   var html = '<button class="back" data-act="home">'+IC.back+'Tous les sujets</button>'+
     '<div class="head2"><span class="plate" aria-hidden="true">'+ROMAN[c.id]+'</span><h1>'+esc(c.t)+'</h1></div>'+
-    '<p class="muted">'+esc(c.d)+' · '+c.total+' questions en '+c.lots.length+' séries de 10</p>'+
-    '<div class="legend"><span><i class="dot pass"></i>Réussie (13/20 ou plus)</span><span><i class="dot fail"></i>À refaire</span><span><i class="dot"></i>Pas encore faite</span></div>'+
+    '<p class="muted">'+esc(c.d)+' · '+c.total+' questions en '+c.lots.length+' séries de 20</p>'+
+    '<div class="legend"><span><i class="dot pass"></i>Réussie (14/20 ou plus)</span><span><i class="dot fail"></i>À refaire</span><span><i class="dot"></i>Pas encore faite</span></div>'+
     '<ul class="lots">'+c.lots.map(function(ids,li){
       var r = P.lots[key(c.id,li)], st = lotState(c.id,li);
       var label = st==='new' ? 'Pas encore faite' : (st==='pass' ? IC.check+'Réussie · '+r.best+'/20' : IC.cross+'À refaire · '+r.best+'/20');
@@ -390,9 +390,9 @@ function vResult(){
   var c = chapterById(S.ci), r = S.rev, pass = r.score>=PASS;
   var next = S.li+1 < c.lots.length;
   var chips = r.ids.map(function(id,i){ var ok=isRight(Q[id], r.ans[id]); return '<button class="chip '+(ok?'ok':'ko')+'" data-act="rv-go" data-id="'+id+'" aria-label="Question '+(i+1)+' : '+(ok?'juste':'fausse')+'">'+(i+1)+(ok?IC.check:IC.cross)+'</button>'; }).join('');
-  var good = r.score/2;
-  var sub = pass ? 'Série réussie : '+good+' bonne'+(good>1?'s':'')+' réponse'+(good>1?'s':'')+' sur 10.' :
-    good+' bonne'+(good>1?'s':'')+' réponse'+(good>1?'s':'')+' sur 10. Il faut au moins '+PASS+'/20 pour réussir, il manque '+(PASS-r.score)+' point'+((PASS-r.score)>1?'s':'')+'. Consultez la correction, puis refaites la série.';
+  var good = r.score;
+  var sub = pass ? 'Série réussie : '+good+' bonne'+(good>1?'s':'')+' réponse'+(good>1?'s':'')+' sur 20.' :
+    good+' bonne'+(good>1?'s':'')+' réponse'+(good>1?'s':'')+' sur 20. Il faut au moins '+PASS+'/20 pour réussir : '+(r.score===13?'13/20 est éliminatoire, ':'')+'il manque '+(PASS-r.score)+' point'+((PASS-r.score)>1?'s':'')+'. Consultez la correction, puis refaites la série.';
   return '<button class="back" data-act="chap-back">'+IC.back+'Séries de ce sujet</button>'+
     '<div class="result"><div class="eyebrow">'+esc(c.t)+' · Série '+(S.li+1)+'</div>'+
     '<div class="roundel '+(pass?'pass':'fail')+'" role="img" aria-label="Note '+r.score+' sur 20"><div><span class="s">'+r.score+'</span><span class="o">/20</span></div></div>'+
@@ -410,7 +410,7 @@ function vReview(){
   var html = '<button class="back" data-act="back-from-review">'+IC.back+'Retour</button>'+
     '<div class="head2"><h1>Correction · Série '+(S.li+1)+'</h1></div>'+
     '<p class="muted">'+esc(c.t)+' · note '+r.score+'/20 · '+errs.length+' erreur'+(errs.length>1?'s':'')+'</p>'+
-    '<div class="tabs" role="group" aria-label="Filtre"><button data-act="filter" data-f="all" aria-pressed="'+(S.filter==='all')+'">Toutes (10)</button><button data-act="filter" data-f="err" aria-pressed="'+(S.filter==='err')+'">Erreurs ('+errs.length+')</button></div>';
+    '<div class="tabs" role="group" aria-label="Filtre"><button data-act="filter" data-f="all" aria-pressed="'+(S.filter==='all')+'">Toutes (20)</button><button data-act="filter" data-f="err" aria-pressed="'+(S.filter==='err')+'">Erreurs ('+errs.length+')</button></div>';
   if(!list.length) html += '<div class="empty">Aucune erreur dans cette série. Bravo.</div>';
   list.forEach(function(id){
     var q = Q[id], sel = r.ans[id] || [], ok = isRight(q, sel), pos = r.ids.indexOf(id)+1;
@@ -422,7 +422,7 @@ function vReview(){
       return '<div class="ro '+cls+'"><span class="let">'+L(i)+'</span><span>'+(q.L?'':esc(t))+'</span>'+(lbl?'<span class="lbl">'+lbl+'</span>':'')+'</div>';
     }).join('');
     var none = sel.length===0 ? '<p class="note" style="margin-top:8px">Aucune réponse cochée.</p>' : '';
-    html += '<article class="rv '+(ok?'ok':'ko')+'" id="rv-'+id+'"><div class="rvhead"><span class="badge '+(ok?'ok':'ko')+'">'+(ok?IC.check+'Juste · 2 pts':IC.cross+'Faux · 0 pt')+'</span><span class="tag">Question '+pos+'</span><span class="tag">n° '+q.n+'</span></div>'+
+    html += '<article class="rv '+(ok?'ok':'ko')+'" id="rv-'+id+'"><div class="rvhead"><span class="badge '+(ok?'ok':'ko')+'">'+(ok?IC.check+'Juste · 1 pt':IC.cross+'Faux · 0 pt')+'</span><span class="tag">Question '+pos+'</span><span class="tag">n° '+q.n+'</span></div>'+
       '<h2 class="stem">'+esc(q.s)+'</h2>'+figsHtml(q)+none+'<div class="rvopts">'+rows+'</div>'+
       '<div class="listen"><button class="btn" data-act="say-corr" data-id="'+id+'">'+IC.spk+'Écouter la correction</button></div></article>';
   });
@@ -451,7 +451,7 @@ function finish(force){
     return;
   }
   stopSpeak(); $modal.innerHTML = '';
-  var n = score(S.ids, S.ans), pts = n*2, k = key(S.ci, S.li), prev = P.lots[k] || {attempts:0, best:0};
+  var n = score(S.ids, S.ans), pts = n, k = key(S.ci, S.li), prev = P.lots[k] || {attempts:0, best:0};
   P.lots[k] = {attempts:(prev.attempts||0)+1, best:Math.max(prev.best||0, pts), last:{score:pts, ids:S.ids.slice(), ans:S.ans, t:Date.now()}};
   save(KP, P);
   S.rev = {score:pts, ids:S.ids.slice(), ans:JSON.parse(JSON.stringify(S.ans))}; S.view = 'result'; render();
